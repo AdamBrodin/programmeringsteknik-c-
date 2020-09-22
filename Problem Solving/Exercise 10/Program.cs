@@ -13,6 +13,8 @@ namespace Exercise_10
 
             Console.Write("Enter some text: ");
             string input = Console.ReadLine();
+
+
         }
     }
 
