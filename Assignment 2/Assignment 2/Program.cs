@@ -5,31 +5,47 @@ using System.Linq;
 using System.Threading;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace ExpenseCalculator
+namespace BudgetCalculator
 {
-    public class Utils
+    public class Program
     {
-        public static String ReadString(string prompt)
+        private static ExpenseCalculator _expenseCalculator = new ExpenseCalculator();
+        private static String[] Options = new String[] { "Add expenses", "Show all expenses", "Show Sum by Category", "Remove Expense", "Remove all Expenses", "Exit program" };
+        private static Boolean isRunning = true;
+        public static void Main()
         {
-            Console.Write(prompt);
-            return Console.ReadLine();
-        }
+            CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
 
-        public static Decimal ReadDecimal(string prompt)
-        {
-            Console.Write(prompt);
-            decimal readValue;
-            Decimal.TryParse(Console.ReadLine(), NumberStyles.Float, CultureInfo.InvariantCulture, out readValue);
-            return readValue;
-        }
+            Console.WriteLine("Welcome to expense calculator");
+            while (isRunning)
+            {
+                var selected = Utils.Menu.Show("Please choose an option!", Options);
 
-        public static void UserBackPrompt()
-        {
-            Console.WriteLine("\nPress any key to go back!");
-            Console.ReadKey();
-            Console.Clear();
+                switch (selected)
+                {
+                    case "Add expenses":
+                        _expenseCalculator.AddExpense();
+                        break;
+                    case "Show all expenses":
+                        _expenseCalculator.ShowAllExpenses();
+                        break;
+                    case "Show Sum by Category":
+                        _expenseCalculator.ShowSumByCategory();
+                        break;
+                    case "Remove Expense":
+                        _expenseCalculator.RemoveExpense();
+                        break;
+                    case "Remove all Expenses":
+                        _expenseCalculator.RemoveAllExpenses();
+                        break;
+                    case "Exit program":
+                        isRunning = false;
+                        break;
+                }
+            }
         }
     }
+
 
     public class Category
     {
@@ -82,14 +98,17 @@ namespace ExpenseCalculator
             String name = Utils.ReadString("Name: ");
 
             Decimal price = Utils.ReadDecimal("Price: ");
-            var selectedCategory = Program.ShowMenu("Select category!", Category.GetCategoryTypes());
+            var selectedCategory = Utils.Menu.Show("Select category!", Category.GetCategoryTypes());
             var expense = new Expense(name, price, Category.ParseCategory(selectedCategory));
             this.expenses.Add(expense);
-
-            Console.WriteLine("Expense added");
         }
 
-        private Decimal SumExpenses(Category.Type? category = null)
+        public void AddExpense(Expense e)
+        {
+            this.expenses.Add(e);
+        }
+
+        public Decimal SumExpenses(Category.Type? category = null)
         {
             decimal sum = 0;
             foreach (Expense e in this.expenses)
@@ -139,7 +158,7 @@ namespace ExpenseCalculator
 
             foreach (KeyValuePair<Category.Type, Decimal> kvp in categorySums)
             {
-                Console.WriteLine($"{kvp.Key}: {kvp.Value} SEK");
+                Console.WriteLine($" {kvp.Key}: {kvp.Value} SEK");
             }
 
             Utils.UserBackPrompt();
@@ -153,7 +172,9 @@ namespace ExpenseCalculator
                 availableExpenses[i] = expenses[i].name;
             }
 
-            String selection = Program.ShowMenu("Select an expense to remove:", availableExpenses);
+            String selection = Utils.Menu.Show("Select an expense to remove:", availableExpenses);
+
+            // Finds and removes the selected expense
             for (int i = 0; i < expenses.Count; i++)
             {
                 if (selection == expenses[i].name)
@@ -174,107 +195,118 @@ namespace ExpenseCalculator
         }
     }
 
-    public class Program
+    public class Utils
     {
-        private static ExpenseCalculator _expenseCalculator = new ExpenseCalculator();
-        private static String[] Options = new String[] { "Add expenses", "Show all expenses", "Show Sum by Category", "Remove Expense", "Remove all Expenses", "Exit program" };
-        public static void Main()
+        public class Menu
         {
-            Boolean isRunning = true;
-            CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
-
-            Console.WriteLine("Welcome to expense calculator");
-            while (isRunning)
+            public static string Show(string prompt, string[] options)
             {
-                var selected = ShowMenu("Please choose an option!", Options);
-
-                switch (selected)
+                if (options == null || options.Length == 0)
                 {
-                    case "Add expenses":
-                        _expenseCalculator.AddExpense();
-                        break;
-                    case "Show all expenses":
-                        _expenseCalculator.ShowAllExpenses();
-                        break;
-                    case "Show Sum by Category":
-                        _expenseCalculator.ShowSumByCategory();
-                        break;
-                    case "Remove Expense":
-                        _expenseCalculator.RemoveExpense();
-                        break;
-                    case "Remove all Expenses":
-                        _expenseCalculator.RemoveAllExpenses();
-                        break;
-                    case "Exit program":
-                        isRunning = false;
-                        break;
+                    throw new ArgumentException("Cannot show a menu for an empty array of options.");
                 }
+
+                Console.WriteLine(prompt);
+
+                int selected = 0;
+
+                // Hide the cursor that will blink after calling ReadKey.
+                Console.CursorVisible = false;
+
+                ConsoleKey? key = null;
+                while (key != ConsoleKey.Enter)
+                {
+                    // If this is not the first iteration, move the cursor to the first line of the menu.
+                    if (key != null)
+                    {
+                        Console.CursorLeft = 0;
+                        Console.CursorTop = Console.CursorTop - options.Length;
+                    }
+
+                    // Print all the options, highlighting the selected one.
+                    for (int i = 0; i < options.Length; i++)
+                    {
+                        var option = options[i];
+                        if (i == selected)
+                        {
+                            Console.BackgroundColor = ConsoleColor.Blue;
+                            Console.ForegroundColor = ConsoleColor.White;
+                        }
+                        Console.WriteLine(" * " + option);
+                        Console.ResetColor();
+                    }
+
+                    // Read another key and adjust the selected value before looping to repeat all of this.
+                    key = Console.ReadKey().Key;
+                    if (key == ConsoleKey.DownArrow)
+                    {
+                        selected = Math.Min(selected + 1, options.Length - 1);
+                    }
+                    else if (key == ConsoleKey.UpArrow)
+                    {
+                        selected = Math.Max(selected - 1, 0);
+                    }
+                }
+
+                // Reset the cursor and return the selected option.
+                Console.Clear();
+                Console.CursorVisible = true;
+                return options[selected];
             }
         }
 
-        public static string ShowMenu(string prompt, string[] options)
+        public static String ReadString(string prompt)
         {
-            if (options == null || options.Length == 0)
-            {
-                throw new ArgumentException("Cannot show a menu for an empty array of options.");
-            }
+            Console.Write(prompt);
+            return Console.ReadLine();
+        }
 
-            Console.WriteLine(prompt);
+        public static Decimal ReadDecimal(string prompt)
+        {
+            Console.Write(prompt);
+            decimal readValue;
+            Decimal.TryParse(Console.ReadLine(), NumberStyles.Float, CultureInfo.InvariantCulture, out readValue);
+            return readValue;
+        }
 
-            int selected = 0;
-
-            // Hide the cursor that will blink after calling ReadKey.
-            Console.CursorVisible = false;
-
-            ConsoleKey? key = null;
-            while (key != ConsoleKey.Enter)
-            {
-                // If this is not the first iteration, move the cursor to the first line of the menu.
-                if (key != null)
-                {
-                    Console.CursorLeft = 0;
-                    Console.CursorTop = Console.CursorTop - options.Length;
-                }
-
-                // Print all the options, highlighting the selected one.
-                for (int i = 0; i < options.Length; i++)
-                {
-                    var option = options[i];
-                    if (i == selected)
-                    {
-                        Console.BackgroundColor = ConsoleColor.Blue;
-                        Console.ForegroundColor = ConsoleColor.White;
-                    }
-                    Console.WriteLine("* " + option);
-                    Console.ResetColor();
-                }
-
-                // Read another key and adjust the selected value before looping to repeat all of this.
-                key = Console.ReadKey().Key;
-                if (key == ConsoleKey.DownArrow)
-                {
-                    selected = Math.Min(selected + 1, options.Length - 1);
-                }
-                else if (key == ConsoleKey.UpArrow)
-                {
-                    selected = Math.Max(selected - 1, 0);
-                }
-            }
-
-            // Reset the cursor and return the selected option.
+        public static void UserBackPrompt()
+        {
+            Console.WriteLine("\nPress any key to go back!");
+            Console.ReadKey();
             Console.Clear();
-            Console.CursorVisible = true;
-            return options[selected];
         }
     }
+}
 
-    [TestClass]
-    public class ProgramTests
+[TestClass]
+public class ProgramTests
+{
+    private BudgetCalculator.ExpenseCalculator _expenseCalculator = new BudgetCalculator.ExpenseCalculator();
+
+    [TestMethod]
+    // MethodName_StateUnderTest_ExpectedBehavior
+    public void SumExpenses_NoExpenses_ReturnsZero()
     {
-        [TestMethod]
-        public void ExampleTest()
-        {
-        }
+        Decimal sum = _expenseCalculator.SumExpenses();
+        Assert.AreEqual(0, sum);
+    }
+
+    [TestMethod]
+    public void SumExpenses_PositiveExpense_ReturnsCurrentExpense()
+    {
+        _expenseCalculator.AddExpense(new BudgetCalculator.Expense("Apple", 10m, BudgetCalculator.Category.Type.Food));
+
+        Decimal sum = _expenseCalculator.SumExpenses();
+        Assert.AreEqual(10m, sum);
+    }
+
+    [TestMethod]
+    public void SumExpenses_NegativePrice_ReturnsCurrentExpense()
+    {
+        _expenseCalculator.AddExpense(new BudgetCalculator.Expense("Banana", -10m, BudgetCalculator.Category.Type.Food));
+
+        Decimal sum = _expenseCalculator.SumExpenses();
+        Assert.AreEqual(-10m, sum);
     }
 }
 
