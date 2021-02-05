@@ -8,19 +8,23 @@
     ".NETCoreApp,Version=v3.1": []
   },
   "packageFolders": {
-    "C:\\Users\\Pappa\\.nuget\\packages\\": {}
+    "C:\\Users\\adam-\\.nuget\\packages\\": {},
+    "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\Pappa\\Documents\\Workspace\\programmeringsteknik-csharp\\Code Style\\Exercise 1\\Exercise 1.csproj",
-      "projectName": "Exercise 1",
-      "projectPath": "C:\\Users\\Pappa\\Documents\\Workspace\\programmeringsteknik-csharp\\Code Style\\Exercise 1\\Exercise 1.csproj",
-      "packagesPath": "C:\\Users\\Pappa\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\Pappa\\Documents\\Workspace\\programmeringsteknik-csharp\\Code Style\\Exercise 1\\obj\\",
+      "projectUniqueName": "C:\\Users\\adam-\\Documents\\Workspace\\programmeringsteknik-csharp\\Code Style\\Exercise 1\\Code Style.csproj",
+      "projectName": "Code Style",
+      "projectPath": "C:\\Users\\adam-\\Documents\\Workspace\\programmeringsteknik-csharp\\Code Style\\Exercise 1\\Code Style.csproj",
+      "packagesPath": "C:\\Users\\adam-\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\adam-\\Documents\\Workspace\\programmeringsteknik-csharp\\Code Style\\Exercise 1\\obj\\",
       "projectStyle": "PackageReference",
+      "fallbackFolders": [
+        "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
+      ],
       "configFilePaths": [
-        "C:\\Users\\Pappa\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\adam-\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
